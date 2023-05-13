@@ -1,0 +1,29 @@
+node 
+{
+ 
+ def mavenHome = tool name:"maven"
+ 
+ stage('checkoutcode')
+ {git credentialsId: '57b2e3e1-5b5c-4d36-904e-e74a43e2570b', url: 'https://github.com/Sowmyashree96/maven-web-application.git'}
+
+ stage('Build'){
+ sh "${mavenHome}/bin/mvn clean install"
+ }
+
+ stage('ExecuteSonarqubeReport'){
+ sh "${mavenHome}/bin/mvn sonar:sonar"
+ }
+
+ /*
+ stage('Sonatype nexus artifactorybuild'){
+ sh "${mavenHome}/bin/mvn clean sonar:sonar deploy"
+ }
+ */
+ 
+ stage('DeployApplicationtoTomcat'){
+sshagent(['98075400-3156-40d1-85a0-a11c32ebcc65']){
+sh "scp -o StrictHostkeyChecking=no target/maven-web-application.war ec2-user@65.2.73.81:/opt/apache-tomcat-9.0.74/webapps/"} 
+
+}
+
+}
